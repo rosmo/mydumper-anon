@@ -396,7 +396,7 @@ void edit_table_columns(GNode *edit_cfg, MYSQL_FIELD *fields, int num_fields, MY
 void randomize_table_columns(GNode *randomize, MYSQL_FIELD *fields, int num_fields, MYSQL_ROW row, gulong *lengths, gboolean *changed)
 {
 	guint i = 0, u = 0;
-	gint index = -1;
+	gint column_index = -1;
 	GNode *field_node = NULL;
 	char *field_name = NULL;
 	GNode *random_type = NULL;
@@ -418,15 +418,15 @@ void randomize_table_columns(GNode *randomize, MYSQL_FIELD *fields, int num_fiel
 		field_node = g_node_nth_child(randomize, i);
 		field_name = (char *)field_node->data;
 
-		index = -1;
+		column_index = -1;
 		for (u = 0; u < (guint)num_fields; u++) {
 			if (strcmp((const char *)fields[u].name, field_name) == 0) {
-				index = (gint)u;
+				column_index = (gint)u;
 				break;
 			}
 		}
 		
-		if (index != -1) {
+		if (column_index != -1) {
 			type_node.needle = (char *)"type";
 			g_node_traverse(field_node, G_IN_ORDER, G_TRAVERSE_ALL, 2, find_gnode_by_string, (gpointer)&type_node);
 			if (type_node.found_node != NULL) {
@@ -465,12 +465,12 @@ void randomize_table_columns(GNode *randomize, MYSQL_FIELD *fields, int num_fiel
 							g_snprintf((tsstr + 10), MAX_TIMESTAMP_LENGTH - 10, " %02d:%02d:%02d", hour, min, sec);
 						}
 
-						if (changed[index]) {
-							g_free(row[index]);
+						if (changed[column_index]) {
+							g_free(row[column_index]);
 						}
-						row[index] = g_strdup(tsstr);
-						lengths[index] = strlen(tsstr);
-						changed[index] = TRUE;
+						row[column_index] = g_strdup(tsstr);
+						lengths[column_index] = strlen(tsstr);
+						changed[column_index] = TRUE;
 					} else {
 						wordlist = (GArray *)g_hash_table_lookup(randomizer_lists, (gpointer)random_type->data);
 						if (wordlist == NULL) {
@@ -480,12 +480,12 @@ void randomize_table_columns(GNode *randomize, MYSQL_FIELD *fields, int num_fiel
 
 						rnd = g_rand_int_range(prng, 0, wordlist->len - 1);
 						word = g_array_index(wordlist, char *, rnd);
-						if (changed[index]) {
-							g_free(row[index]);
+						if (changed[column_index]) {
+							g_free(row[column_index]);
 						}
-						row[index] = g_strdup(word);
-						lengths[index] = strlen(word);
-						changed[index] = TRUE;
+						row[column_index] = g_strdup(word);
+						lengths[column_index] = strlen(word);
+						changed[column_index] = TRUE;
 
 					}
 				}
