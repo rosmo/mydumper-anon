@@ -9,7 +9,7 @@ find_package(MySQL)
 find_package(ZLIB)
 find_package(GLIB2)
 find_package(PCRE)
-find_package(LIBYAML)
+find_package(LibYAML)
 find_package(OpenSSL)
 
 option(BUILD_DOCS "Build the documentation" ON)
