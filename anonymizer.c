@@ -37,7 +37,7 @@ void process_yaml(yaml_parser_t *parser, GNode *data);
 GNode *get_table_anonymization(char *database, char *table);
 gboolean find_gnode_by_string(GNode *node, gpointer data);
 gboolean read_randomizer_lists();
-void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fields, MYSQL_ROW row, gulong *lengths, gboolean *changed, gint index);
+void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fields, MYSQL_ROW row, gulong *lengths, gboolean *changed, gint column_index);
 
 enum storage_flags { VAR, VAL, SEQ }; // "Store as" switch
 
@@ -189,16 +189,16 @@ gboolean has_columns_to_anonymize(GNode *table)
 	return FALSE;
 }
 
-void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fields, MYSQL_ROW row, gulong *lengths, gboolean *changed, gint index)
+void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fields, MYSQL_ROW row, gulong *lengths, gboolean *changed, gint column_index)
 {
 	gchar *result = NULL, *lastresult = NULL, *value_copy = NULL, *modifier = NULL, *final_value = NULL;
 	unsigned long i = 0, last = 0, o = 0, start = 0, end = 0;
-	int column_index = -1;
+	int found_index = -1;
 	unsigned char md5_result[MD5_DIGEST_LENGTH];
 
 	// shortest that needs replacing is "{{a}}"
 	if (strlen(value) < 5) {
-		row[index] = strdup(value);
+		row[column_index] = strdup(value);
 		return;
 	}
 
@@ -226,15 +226,15 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 				}
 			}
 
-			column_index = -1;
+			found_index = -1;
 			for (o = 0; o < (unsigned long)num_fields; o++) {
 				if (strcmp(fields[o].name, (value_copy + start)) == 0) {
-					column_index = o;
+					found_index = o;
 					break;
 				}
 			}
-			if (column_index != -1) {
-				final_value = (gchar *)g_strdup(row[column_index]);
+			if (found_index != -1) {
+				final_value = (gchar *)g_strdup(row[found_index]);
 				
 				if (modifier != NULL) {
 					if (strcmp(modifier, "md5") == 0) {
@@ -292,12 +292,12 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	}
 	last = end + 1;
 	
-	if (changed[index]) {
-		g_free(row[index]);
+	if (changed[column_index]) {
+		g_free(row[column_index]);
 	}
-	row[index] = result;
-	lengths[index] = strlen(result);
-	changed[index] = TRUE;
+	row[column_index] = result;
+	lengths[column_index] = strlen(result);
+	changed[column_index] = TRUE;
 }
 
 void edit_table_columns(GNode *edit_cfg, MYSQL_FIELD *fields, int num_fields, MYSQL_ROW row, gulong *lengths, gboolean *changed)
