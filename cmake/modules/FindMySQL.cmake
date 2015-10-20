@@ -89,7 +89,9 @@ foreach(MY_LIB ${MYSQL_ADD_LIBRARIES})
     find_library("MYSQL_LIBRARIES_${MY_LIB}" NAMES ${MY_LIB}
         HINTS
         ${MYSQL_ADD_LIBRARY_PATH}
+        /usr/lib64/mysql
         /usr/lib/mysql
+	/usr/lib64
 	/usr/lib
         /usr/local/lib
         /usr/local/lib/mysql

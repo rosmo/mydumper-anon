@@ -1,3 +1,4 @@
+// -*- mode: C; c-basic-offset: 8; tab-width: 8; indent-tabs-mode: t; -*-
 /*
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@
 #else
 #include "mydumper.h"
 #endif
+#include "anonymizer.h"
 #include "server_detect.h"
 #include "common.h"
 #include "g_unix_signal.h"
@@ -88,6 +90,7 @@ gchar *daemon_binlog_directory= NULL;
 
 gchar *logfile= NULL;
 FILE *logoutfile= NULL;
+gchar *anonymize_configfile=NULL;
 
 gboolean no_schemas= FALSE;
 gboolean no_data= FALSE;
@@ -155,6 +158,7 @@ static GOptionEntry entries[] =
 	{ "lock-all-tables", 0, 0, G_OPTION_ARG_NONE, &lock_all_tables, "Use LOCK TABLE for all, instead of FTWRL", NULL},
 	{ "updated-since", 'U', 0, G_OPTION_ARG_INT, &updated_since, "Use Update_time to dump only tables updated in the last U days", NULL},
 	{ "trx-consistency-only", 0, 0, G_OPTION_ARG_NONE, &trx_consistency_only, "Transactional consistency only", NULL},
+	{ "anonymize", 0, 0, G_OPTION_ARG_FILENAME, &anonymize_configfile, "Data anonymization configuration file", NULL},
 	{ NULL, 0, 0, G_OPTION_ARG_NONE,   NULL, NULL, NULL }
 };
 
@@ -805,6 +809,13 @@ int main(int argc, char *argv[])
 
 	set_verbose(verbose);
 
+	if (anonymize_configfile != NULL) {
+		if (!read_anonymizer_config(anonymize_configfile)) {
+			g_critical("Could not read anonymizer configuration from %s", anonymize_configfile);
+			exit(EXIT_FAILURE);
+		}
+	}
+	
 	time_t t;
 	time(&t);localtime_r(&t,&tval);
 	
@@ -918,6 +929,10 @@ int main(int argc, char *argv[])
 
 	if (logoutfile) {
 		fclose(logoutfile);
+	}
+	
+	if (anonymize_configfile != NULL) {
+		free_anonymizer_config();
 	}
 
 	exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
@@ -1764,14 +1779,8 @@ void dump_database(MYSQL * conn, char *database, FILE *file, struct configuratio
 		if ((detected_server == SERVER_TYPE_MYSQL) && ( row[ccol] == NULL || !strcmp(row[ccol],"VIEW") ))
 			is_view = 1;
 
-		/* Check for broken tables, i.e. mrg with missing source tbl */
-		if ( !is_view && row[ecol] == NULL ) {
-			g_warning("Broken table detected, please review: %s.%s", database, row[0]);
-			dump = 0;
-		}
-
 		/* Skip ignored engines, handy for avoiding Merge, Federated or Blackhole :-) dumps */
-		if (dump && ignore && !is_view) {
+		if (ignore && !is_view) {
 			for (i = 0; ignore[i] != NULL; i++) {
 				if (g_ascii_strcasecmp(ignore[i], row[ecol]) == 0) {
 					dump = 0;
@@ -2439,7 +2448,18 @@ void dump_view_data(MYSQL *conn, char *database, char *table, char *filename, ch
 
 void dump_table_data_file(MYSQL *conn, char *database, char *table, char *where, char *filename) {
 	void *outfile;
+	GNode *table_cfg;
 
+	if (anonymize) {
+		table_cfg = get_table_anonymization(database, table);
+		if (table_cfg != NULL) {
+			if (should_truncate_table(table_cfg)) {
+				g_warning("Anonymizer: Not dumping table %s.%s", database, table);
+				return;
+			}
+		}
+	}
+	
 	if (!compress_output)
 		outfile = g_fopen(filename, "w");
 	else
@@ -2640,6 +2660,9 @@ guint64 dump_table_data(MYSQL * conn, FILE *file, char *database, char *table, c
 	char *query = NULL;
 	gchar *fcfile = NULL;
 	gchar* filename_prefix = NULL;
+	GNode *table_cfg = NULL;
+	gboolean anonymize_columns = FALSE;
+	GNode *table_column_edit = NULL;
 	
 	fcfile = g_strdup (filename);
 	
@@ -2674,15 +2697,31 @@ guint64 dump_table_data(MYSQL * conn, FILE *file, char *database, char *table, c
 	/* Buffer for escaping field values */
 	GString *escaped = g_string_sized_new(3000);
 
-	MYSQL_ROW row;
+	MYSQL_ROW row, origrow;
 
 	g_string_set_size(statement,0);
+
+	if (anonymize) {
+		table_cfg = get_table_anonymization(database, table);
+		if (table_cfg != NULL) {
+			anonymize_columns = has_columns_to_anonymize(table_cfg);
+		}
+	}
 
 	/* Poor man's data dump code */
 	while ((row = mysql_fetch_row(result))) {
 		gulong *lengths = mysql_fetch_lengths(result);
 		num_rows++;
 
+		if (anonymize_columns) {
+			// allocate new row
+			origrow = row;
+			row = (MYSQL_ROW)malloc(sizeof(char *) * num_fields);
+			memcpy((void *)row, (void *)origrow, sizeof(char *) * num_fields);
+			
+			anonymize_table_columns(table_cfg, fields, num_fields, row, lengths);
+		}
+		
 		if (!statement->len){
 			if(!st_in_file){
 				if (detected_server == SERVER_TYPE_MYSQL) {
@@ -2767,6 +2806,16 @@ guint64 dump_table_data(MYSQL * conn, FILE *file, char *database, char *table, c
 				}
 			}
 		}
+
+		if (table_column_edit != NULL) {
+			// free any rows that were changed
+			for (i = 0; i < num_fields; i++) {
+				if (origrow[i] != row[i]) {
+					g_free(row[i]);
+				}
+			}
+		}
+
 	}
 	if (mysql_errno(conn)) {
 		g_critical("Could not read data from %s.%s: %s", database, table, mysql_error(conn));
