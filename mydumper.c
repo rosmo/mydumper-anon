@@ -2662,7 +2662,6 @@ guint64 dump_table_data(MYSQL * conn, FILE *file, char *database, char *table, c
 	gchar* filename_prefix = NULL;
 	GNode *table_cfg = NULL;
 	gboolean anonymize_columns = FALSE;
-	GNode *table_column_edit = NULL;
 	
 	fcfile = g_strdup (filename);
 	
@@ -2807,13 +2806,15 @@ guint64 dump_table_data(MYSQL * conn, FILE *file, char *database, char *table, c
 			}
 		}
 
-		if (table_column_edit != NULL) {
+		if (anonymize_columns) {
 			// free any rows that were changed
 			for (i = 0; i < num_fields; i++) {
 				if (origrow[i] != row[i]) {
 					g_free(row[i]);
 				}
 			}
+			// This is our allocation
+			g_free(row);
 		}
 
 	}

@@ -285,6 +285,10 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 				     (gchar *)(value_copy + last),
 				     NULL);
 	}
+
+	if (value_copy != NULL) {
+		free(value_copy);
+	}
 	
 	if (lastresult != NULL) {
 		g_free(lastresult);
