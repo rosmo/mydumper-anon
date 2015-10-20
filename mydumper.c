@@ -2696,7 +2696,7 @@ guint64 dump_table_data(MYSQL * conn, FILE *file, char *database, char *table, c
 	/* Buffer for escaping field values */
 	GString *escaped = g_string_sized_new(3000);
 
-	MYSQL_ROW row, origrow;
+	MYSQL_ROW row, origrow = NULL;
 
 	g_string_set_size(statement,0);
 
