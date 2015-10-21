@@ -205,14 +205,19 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	value_copy = g_strdup((const gchar *)value);
 	last = 0;
 	for (i = 1; i < strlen(value); i++) {
-		if ((value[i-1] == '{' || value[i] == '{') && (i+2) < strlen(value)) {
+		if ((value[i-1] == '{' && value[i] == '{') && (i+2) < strlen(value)) {
 			start = i + 1;
+			end = 0;
 			for (o = i + 2; o < strlen(value); o++) {
 				if (value[o] == '}' && value[o+1] == '}') {
 					end = o - 1;
 					i = o + 1;
 					break;
 				}
+			}
+			if (end == 0) {
+				// Stray {{
+				break;
 			}
 			lastresult = result;
 
@@ -228,7 +233,7 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 
 			found_index = -1;
 			for (o = 0; o < (unsigned long)num_fields; o++) {
-				if (strcmp(fields[o].name, (value_copy + start + 1)) == 0) {
+				if (strcmp(fields[o].name, (value_copy + start)) == 0) {
 					found_index = o;
 					break;
 				}
@@ -252,7 +257,7 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 			}
 			       
 			
-			value_copy[start - 1] = '\0';
+			value_copy[start - 2] = '\0';
 			if (result == NULL) {
 				result = g_strconcat((gchar *)(value_copy + last),
 						     final_value,
