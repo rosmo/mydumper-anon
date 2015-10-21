@@ -228,7 +228,7 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 
 			found_index = -1;
 			for (o = 0; o < (unsigned long)num_fields; o++) {
-				if (strcmp(fields[o].name, (value_copy + start)) == 0) {
+				if (strcmp(fields[o].name, (value_copy + start + 1)) == 0) {
 					found_index = o;
 					break;
 				}
@@ -252,7 +252,7 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 			}
 			       
 			
-			value_copy[start - 2] = '\0';
+			value_copy[start - 1] = '\0';
 			if (result == NULL) {
 				result = g_strconcat((gchar *)(value_copy + last),
 						     final_value,
