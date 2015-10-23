@@ -65,7 +65,7 @@ Example of all operations currently implemented:
      firstname: firstnames.txt
      lastname: lastnames.txt
      fullname: fullnames.txt
-    
+
  database_name:
    table_name_1:
      truncate: yes
@@ -98,3 +98,7 @@ Example of all operations currently implemented:
        - when: {email: '.+'}
          set: {email: '{{id_user|md5}}@anonymized.com', name: '{{name|md5}}'}
 
+ # This will apply to all databases
+ _all:
+   table_name_6:
+     truncate: yes
