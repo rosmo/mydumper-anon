@@ -546,6 +546,19 @@ GNode *get_table_anonymization(char *database, char *table)
 			return table_node.found_node;
 		}
 	}
+
+	db_node.needle = (char *)"_all";
+	g_node_traverse(anonymizer_config, G_IN_ORDER, G_TRAVERSE_ALL, 2, find_gnode_by_string, (gpointer)&db_node);
+
+	if (db_node.found_node != NULL) {
+		table_node.needle = table;
+		g_node_traverse(db_node.found_node, G_IN_ORDER, G_TRAVERSE_ALL, 2, find_gnode_by_string, (gpointer)&table_node);
+
+		if (table_node.found_node != NULL) {
+			return table_node.found_node;
+		}
+	}
+
 	return NULL;
 }
 
