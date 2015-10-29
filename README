@@ -65,7 +65,7 @@ Example of all operations currently implemented:
      firstname: firstnames.txt
      lastname: lastnames.txt
      fullname: fullnames.txt
-
+    
  database_name:
    table_name_1:
      truncate: yes
@@ -93,12 +93,10 @@ Example of all operations currently implemented:
        date_column_name:
          type: 'date'
 	
+   # Modifiers are separated with |, currently only md5 supported. Additionally you can 
+   # specify a ":n" after the modifier to only take n amount of characters.
    table_name_5:
      edit:
        - when: {email: '.+'}
-         set: {email: '{{id_user|md5}}@anonymized.com', name: '{{name|md5}}'}
+         set: {email: '{{id_user|md5:10}}@anonymized.com', name: '{{name|md5}}'}
 
- # This will apply to all databases
- _all:
-   table_name_6:
-     truncate: yes

@@ -195,6 +195,8 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	unsigned long i = 0, last = 0, o = 0, start = 0, end = 0;
 	int found_index = -1;
 	unsigned char md5_result[MD5_DIGEST_LENGTH];
+	char *sub_str = NULL;
+	int sub_pos = 0;
 
 	// shortest that needs replacing is "{{a}}"
 	if (strlen(value) < 5) {
@@ -242,13 +244,21 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 				final_value = (gchar *)g_strdup(row[found_index]);
 				
 				if (modifier != NULL) {
-					if (strcmp(modifier, "md5") == 0) {
+					if (strncmp(modifier, "md5", 3) == 0) {
 						MD5((const unsigned char *)final_value, strlen(final_value), md5_result);
 						g_free(final_value);
 						final_value = (gchar *)malloc((MD5_DIGEST_LENGTH * sizeof(gchar) * 2) + 1);
 						memset(final_value, 0, (MD5_DIGEST_LENGTH * sizeof(gchar) * 2) + 1);
 						for (o = 0; o < MD5_DIGEST_LENGTH; o++) {
 							sprintf(final_value, "%s%02x", final_value, md5_result[o]);
+						}
+					}
+					sub_str = strstr(modifier, ":");
+					if (sub_str != NULL) {
+						sub_str++;
+						sub_pos = atoi(sub_str);
+						if (sub_pos < (int)strlen(final_value)) {
+							*(final_value + sub_pos) = '\0';
 						}
 					}
 				}
