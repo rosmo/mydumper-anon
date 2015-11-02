@@ -10,7 +10,6 @@ find_package(ZLIB)
 find_package(GLIB2)
 find_package(PCRE)
 find_package(LibYAML)
-find_package(OpenSSL)
 
 option(BUILD_DOCS "Build the documentation" ON)
 
@@ -22,7 +21,7 @@ option(WITH_BINLOG "Build binlog dump options" OFF)
 
 set(CMAKE_C_FLAGS "-Wall -Wno-deprecated-declarations -Wunused -Wwrite-strings -Wno-strict-aliasing -Wextra -Wshadow -Werror -O3 -g ${MYSQL_CFLAGS}")
 
-include_directories(${MYDUMPER_SOURCE_DIR} ${MYSQL_INCLUDE_DIR} ${GLIB2_INCLUDE_DIR} ${PCRE_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS} ${LIBYAML_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+include_directories(${MYDUMPER_SOURCE_DIR} ${MYSQL_INCLUDE_DIR} ${GLIB2_INCLUDE_DIR} ${PCRE_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS} ${LIBYAML_INCLUDE_DIR})
 
 if (NOT CMAKE_INSTALL_PREFIX)
   SET(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "Install path" FORCE)
@@ -36,7 +35,7 @@ if (WITH_BINLOG)
 else (WITH_BINLOG)
   add_executable(mydumper mydumper.c server_detect.c g_unix_signal.c anonymizer.c)
 endif (WITH_BINLOG)
-target_link_libraries(mydumper ${MYSQL_LIBRARIES} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES} ${LIBYAML_LIBRARIES} ${OPENSSL_LIBRARIES})
+target_link_libraries(mydumper ${MYSQL_LIBRARIES} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES} ${LIBYAML_LIBRARIES})
 
 add_executable(myloader myloader.c)
 target_link_libraries(myloader ${MYSQL_LIBRARIES} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES})
