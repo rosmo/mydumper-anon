@@ -56,6 +56,10 @@ The :program:`mydumper` tool has several available options:
 
    The UNIX domain socket file to use for the connection
 
+.. option:: --defaults-file
+
+   The file to read mysql connection data from
+
 .. option:: --database, -B
 
    Database to dump
