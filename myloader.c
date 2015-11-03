@@ -120,6 +120,13 @@ int main(int argc, char *argv[]) {
 
 	set_verbose(verbose);
 
+	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+	if (defaults_file && access(defaults_file, R_OK) != 0) {
+		g_critical("Can't access %s: %s", defaults_file, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	// end
+	
 	if (!directory) {
 		g_critical("a directory needs to be specified, see --help\n");
 		exit(EXIT_FAILURE);
@@ -133,6 +140,10 @@ int main(int argc, char *argv[]) {
 
 	MYSQL *conn;
 	conn= mysql_init(NULL);
+	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+	if (defaults_file)
+		mysql_options(conn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+	// end
 	mysql_options(conn, MYSQL_READ_DEFAULT_GROUP, "myloader");
 
 	if (!mysql_real_connect(conn, hostname, username, password, NULL, port, socket_path, 0)) {
@@ -405,6 +416,10 @@ void *process_queue(struct thread_data *td) {
 	MYSQL *thrconn= mysql_init(NULL);
 	g_mutex_unlock(init_mutex);
 
+	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+	if (defaults_file)
+		mysql_options(thrconn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+	// end
 	mysql_options(thrconn, MYSQL_READ_DEFAULT_GROUP, "myloader");
 
 	if (compress_protocol)

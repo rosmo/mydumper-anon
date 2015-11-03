@@ -393,7 +393,11 @@ void *process_queue(struct thread_data *td) {
 	g_mutex_lock(init_mutex);
 	MYSQL *thrconn = mysql_init(NULL);
 	g_mutex_unlock(init_mutex);
-	
+
+ 	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+ 	if (defaults_file)
+ 		mysql_options(thrconn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+ 	// end
 	mysql_options(thrconn,MYSQL_READ_DEFAULT_GROUP,"mydumper");
 
 	if (compress_protocol)
@@ -593,7 +597,11 @@ void *process_queue_less_locking(struct thread_data *td) {
 	g_mutex_lock(init_mutex);
 	MYSQL *thrconn = mysql_init(NULL);
 	g_mutex_unlock(init_mutex);
-	
+
+	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+ 	if (defaults_file)
+ 		mysql_options(thrconn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+ 	// end
 	mysql_options(thrconn,MYSQL_READ_DEFAULT_GROUP,"mydumper");
 
 	if (compress_protocol)
@@ -767,6 +775,11 @@ MYSQL *reconnect_for_binlog(MYSQL *thrconn) {
 	thrconn= mysql_init(NULL);
 	g_mutex_unlock(init_mutex);
 
+	// read defaults file also in reconnect_for_binlog cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/108
+	if (defaults_file)
+		mysql_options(thrconn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+	// end
+
 	if (compress_protocol)
 		mysql_options(thrconn,MYSQL_OPT_COMPRESS,NULL);
 
@@ -815,7 +828,14 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 	}
-	
+
+ 	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+ 	if (defaults_file && access(defaults_file, R_OK) != 0) {
+ 		g_critical("Can't access %s: %s", defaults_file, strerror(errno));
+ 		exit(EXIT_FAILURE);
+ 	}
+ 	// end
+
 	time_t t;
 	time(&t);localtime_r(&t,&tval);
 
@@ -942,6 +962,10 @@ MYSQL *create_main_connection()
 {
 	MYSQL *conn;
 	conn = mysql_init(NULL);
+	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+	if (defaults_file)
+		mysql_options(conn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+	// end
 	mysql_options(conn,MYSQL_READ_DEFAULT_GROUP,"mydumper");
 
 	if (!mysql_real_connect(conn, hostname, username, password, db, port, socket_path, 0)) {
@@ -1010,6 +1034,10 @@ void *binlog_thread(void *data) {
 	MYSQL_ROW row;
 	MYSQL *conn;
 	conn = mysql_init(NULL);
+	// add support for --defaults-file cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/106
+	if (defaults_file)
+		mysql_options(conn,MYSQL_READ_DEFAULT_FILE, defaults_file);
+	// end
 	mysql_options(conn,MYSQL_READ_DEFAULT_GROUP,"mydumper");
 
 	if (!mysql_real_connect(conn, hostname, username, password, db, port, socket_path, 0)) {

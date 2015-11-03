@@ -35,3 +35,10 @@ In the following example mydumper will use daemon mode, creating a snapshot
 every half an hour and log to an output file::
 
   mydumper --daemon --snapshot-interval=30 --logfile=dump.log
+
+Defaults file
+-------------
+Mydumper supports the standard :option:`--defaults-file` option to read
+connection data from a file. By default it will read the ``[client]`` group and
+``[mydumper]`` group. This for example is useful to avoid having passwords in
+the command line.

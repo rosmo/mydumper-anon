@@ -21,6 +21,9 @@ char *hostname=NULL;
 char *username=NULL;
 char *password=NULL;
 char *socket_path=NULL;
+// add defaults-file option cf. http://bazaar.launchpad.net/~filippo/mydumper/defaults-file/revision/105
+char *defaults_file=NULL;
+// end
 char *db=NULL;
 guint port=3306;
 guint num_threads= 4;
