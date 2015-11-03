@@ -49,6 +49,10 @@ The :program:`myloader` tool has several available options:
 
    The UNIX domain socket file to use for the connection
 
+.. option:: --defaults-file
+
+   The file to read mysql connection data from
+
 .. option:: --threads, -t
 
    The number of threads to use for restoring data, default is 4
