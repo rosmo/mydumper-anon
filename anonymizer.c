@@ -23,7 +23,6 @@
 #include <yaml.h>
 #include <mysql.h>
 #include <pcre.h>
-#include <openssl/md5.h>
 #include "mydumper.h"
 
 GNode *anonymizer_config = NULL;
@@ -194,7 +193,9 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	gchar *result = NULL, *lastresult = NULL, *value_copy = NULL, *modifier = NULL, *final_value = NULL;
 	unsigned long i = 0, last = 0, o = 0, start = 0, end = 0;
 	int found_index = -1;
-	unsigned char md5_result[MD5_DIGEST_LENGTH];
+	char *sub_str = NULL;
+	int sub_pos = 0;
+	GChecksum *cksum = NULL;
 
 	// shortest that needs replacing is "{{a}}"
 	if (strlen(value) < 5) {
@@ -205,14 +206,19 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	value_copy = g_strdup((const gchar *)value);
 	last = 0;
 	for (i = 1; i < strlen(value); i++) {
-		if ((value[i-1] == '{' || value[i] == '{') && (i+2) < strlen(value)) {
+		if ((value[i-1] == '{' && value[i] == '{') && (i+2) < strlen(value)) {
 			start = i + 1;
+			end = 0;
 			for (o = i + 2; o < strlen(value); o++) {
 				if (value[o] == '}' && value[o+1] == '}') {
 					end = o - 1;
 					i = o + 1;
 					break;
 				}
+			}
+			if (end == 0) {
+				// Stray {{
+				break;
 			}
 			lastresult = result;
 
@@ -234,16 +240,28 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 				}
 			}
 			if (found_index != -1) {
-				final_value = (gchar *)g_strdup(row[found_index]);
+				if (row[found_index] == NULL) {
+					final_value = (gchar *)g_strdup("");
+				} else {
+					final_value = (gchar *)g_strdup(row[found_index]);
+				}
 				
 				if (modifier != NULL) {
-					if (strcmp(modifier, "md5") == 0) {
-						MD5((const unsigned char *)final_value, strlen(final_value), md5_result);
+					if (strncmp(modifier, "md5", 3) == 0) {
+
+						cksum = g_checksum_new(G_CHECKSUM_MD5);
+						g_checksum_update(cksum, (const guchar *)final_value, strlen(final_value));
+
 						g_free(final_value);
-						final_value = (gchar *)malloc((MD5_DIGEST_LENGTH * sizeof(gchar) * 2) + 1);
-						memset(final_value, 0, (MD5_DIGEST_LENGTH * sizeof(gchar) * 2) + 1);
-						for (o = 0; o < MD5_DIGEST_LENGTH; o++) {
-							sprintf(final_value, "%s%02x", final_value, md5_result[o]);
+						final_value = g_strdup(g_checksum_get_string(cksum));
+						g_checksum_free(cksum);
+					}
+					sub_str = strstr(modifier, ":");
+					if (sub_str != NULL) {
+						sub_str++;
+						sub_pos = atoi(sub_str);
+						if (sub_pos > 0 && sub_pos < (int)strlen(final_value)) {
+							*(final_value + sub_pos) = '\0';
 						}
 					}
 				}
@@ -284,6 +302,10 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 		result = g_strconcat(result,
 				     (gchar *)(value_copy + last),
 				     NULL);
+	}
+
+	if (value_copy != NULL) {
+		free(value_copy);
 	}
 	
 	if (lastresult != NULL) {
@@ -537,6 +559,19 @@ GNode *get_table_anonymization(char *database, char *table)
 			return table_node.found_node;
 		}
 	}
+
+	db_node.needle = (char *)"_all";
+	g_node_traverse(anonymizer_config, G_IN_ORDER, G_TRAVERSE_ALL, 2, find_gnode_by_string, (gpointer)&db_node);
+
+	if (db_node.found_node != NULL) {
+		table_node.needle = table;
+		g_node_traverse(db_node.found_node, G_IN_ORDER, G_TRAVERSE_ALL, 2, find_gnode_by_string, (gpointer)&table_node);
+
+		if (table_node.found_node != NULL) {
+			return table_node.found_node;
+		}
+	}
+
 	return NULL;
 }
 

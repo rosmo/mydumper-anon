@@ -93,8 +93,10 @@ Example of all operations currently implemented:
        date_column_name:
          type: 'date'
 	
+   # Modifiers are separated with |, currently only md5 supported. Additionally you can 
+   # specify a ":n" after the modifier to only take n amount of characters.
    table_name_5:
      edit:
        - when: {email: '.+'}
-         set: {email: '{{id_user|md5}}@anonymized.com', name: '{{name|md5}}'}
+         set: {email: '{{id_user|md5:10}}@anonymized.com', name: '{{name|md5}}'}
 
