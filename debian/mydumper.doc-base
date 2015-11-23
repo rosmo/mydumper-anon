@@ -1,0 +1,10 @@
+Document: mydumper
+Title: MySQL Data Dumper documentation
+Author: Domas Mituzas, Andrew Hutchings, Mark Leith 
+Abstract: This is the documentation shipped with
+ mydumper, describing usage and prvoding examples
+Section: Data Management
+
+Format: HTML
+Index: /usr/share/doc/mydumper/html/index.html
+Files: /usr/share/doc/mydumper/html/*.html

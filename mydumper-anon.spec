@@ -8,10 +8,11 @@
 # See https://bugs.launchpad.net/mydumper/+bug/803982
 # And https://bugzilla.redhat.com/show_bug.cgi?id=728634
 
+# It compiles nicely with mysql-5.6 community binaries from mysql.com.
 
-Name:           mydumper-anon
-Version:        0.6.2
-Release:        1%{?dist}
+Name:           mydumper
+Version:        0.9.3
+Release:        6%{?dist}
 Summary:        A high-performance MySQL backup tool
 
 Group:          Applications/Databases
@@ -22,7 +23,7 @@ Source0:        https://github.com/rosmo/mydumper-anon/archive/master.tar.gz
 
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  glib2-devel mysql-devel zlib-devel pcre-devel
+BuildRequires:  glib2-devel mysql-devel zlib-devel pcre-devel libyaml-devel
 BuildRequires:  cmake
 %if %{with_doc}
 BuildRequires:  python-sphinx
@@ -36,6 +37,9 @@ The main developers originally worked as Support Engineers at MySQL
 (one has moved to Facebook and another to SkySQL) and this is how they would
 envisage mysqldump based on years of user feedback.
 
+Mydumper-anon is a fork that provides extra functionality of in-line
+data anonymization, obfuscation, and randomization.
+
 %if %{with_doc}
 Documentation: /usr/share/doc/mydumper/html/index.html
 %endif
@@ -44,9 +48,6 @@ Documentation: /usr/share/doc/mydumper/html/index.html
 %prep
 #%setup -q
 %setup -q -n mydumper-anon-master
-
-# commented by Alex
-# sed -e 's/-Werror//' -i CMakeLists.txt
 
 
 %build
@@ -63,10 +64,6 @@ rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 
 rm -f %{buildroot}%{_datadir}/doc/%{name}/html/.buildinfo
-# we do not wont this package to conflict with normal mode mydumper
-mv -f %{buildroot}%{_bindir}/mydumper %{buildroot}%{_bindir}/mydumper-anon
-rm -f %{buildroot}%{_bindir}/myloader
-
 
 %clean
 rm -rf %{buildroot}
@@ -74,8 +71,8 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/mydumper-anon
-#%{_bindir}/myloader
+%{_bindir}/mydumper
+%{_bindir}/myloader
 %if %{with_doc}
 %{_mandir}/man1/mydumper.*
 %{_mandir}/man1/myloader.*
@@ -84,8 +81,11 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Tue Oct 20 2015 Alexander Kabakaev <alexander.kabakaev@rocket-internet.de> - 0.6.2-1
-- spec is rewritten for mydumper-anon
+* Tue Nov  3 2015 Alexander Kabakaev <alexander.kabakaev@rocket-internet.de> - 0.9.3-6
+- support for --defaults-file option is added
+
+* Tue Oct 29 2015 Alexander Kabakaev <alexander.kabakaev@rocket-internet.de> - 0.9.3-4
+- spec is rewritten for mydumper-anon master branch
 
 * Thu Jan  3 2013 Remi Collet <remi@fedoraproject.org> - 0.2.3-2
 - don't break build because of warnings

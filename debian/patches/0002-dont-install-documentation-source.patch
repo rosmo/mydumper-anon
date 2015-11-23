@@ -1,0 +1,24 @@
+From: Mateusz Kijowski <mkijowski@trojmiasto.pl>
+Date: Tue, 22 Nov 2011 17:44:04 +0100
+Subject: dont install documentation source
+
+---
+ docs/CMakeLists.txt | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/docs/CMakeLists.txt b/docs/CMakeLists.txt
+index c43d246..7c75c99 100644
+--- a/docs/CMakeLists.txt
++++ b/docs/CMakeLists.txt
+@@ -61,11 +61,6 @@ if(GENERATE_DOC)
+     "${SOURCES_DIR}"
+   )
+ 
+-  # note the trailing slash to exclude directory name
+-  install(DIRECTORY "${SOURCES_DIR}/"
+-    DESTINATION "share/doc/mydumper"
+-  )
+-
+   # Sphinx cache with pickled ReST documents
+   set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
+   # HTML output directory
