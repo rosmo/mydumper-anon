@@ -1,0 +1,77 @@
+mydumper (0.9.3-5) unstable; urgency=low
+
+  * Support for --defaults-file option is added
+
+ -- Alex Kabakaev <kabakaev@gmail.com>  Thu, 22 Oct 2015 11:54:12 +0200
+
+mydumper (0.9.3-4) unstable; urgency=low
+
+  * new version is built from master, which fixes mydumper crash.
+  * Also OpenSSL dependency was removed, since GLib has a hash function of its own.
+
+ -- Alex Kabakaev <kabakaev@gmail.com>  Thu, 22 Oct 2015 11:54:12 +0200
+
+mydumper (0.9.3-3) unstable; urgency=low
+
+  * stripping is disabled
+
+ -- Alex Kabakaev <kabakaev@gmail.com>  Thu, 22 Oct 2015 11:54:12 +0200
+
+mydumper (0.9.3-2) unstable; urgency=low
+
+  * switched to mydumper name and updated version
+
+ -- Alex Kabakaev <kabakaev@gmail.com>  Thu, 22 Oct 2015 11:54:12 +0200
+
+mydumper-anon (0.9.3-1) unstable; urgency=low
+
+  * updated to support mydumper-anon
+
+ -- Alex Kabakaev <kabakaev@gmail.com>  Thu, 22 Oct 2015 11:54:12 +0200
+
+mydumper (0.6.1-1) unstable; urgency=medium
+
+  * updated standards version
+  * move sphinxdoc depends to recommends (Closes: #730443)
+  * homepage updated (Closes: #714921)
+  * explicitly tell CMAKE to link libm
+    patch 0003-explicitly-link-libm.patch
+  * Imported Upstream version 0.6.1 (Closes: #735851) (LP: #1270330)
+
+ -- Mateusz Kijowski <mateusz.kijowski@gmail.com>  Thu, 20 Mar 2014 01:17:43 +0100
+
+mydumper (0.5.2-1) unstable; urgency=low
+
+  * Imported Upstream version 0.5.2 (Closes: #707458)
+  * removed patches merged by upstream
+
+ -- Mateusz Kijowski <mateusz.kijowski@gmail.com>  Thu, 09 May 2013 12:08:05 +0200
+
+mydumper (0.5.1-3) unstable; urgency=low
+
+  * fix FTBFS in multiarch env (Closes: #673262) (LP: #1002291) 
+    patch 0006-fix-runaway-regexp-in-in-cmake.patch
+
+ -- Mateusz Kijowski <mateusz.kijowski@gmail.com>  Mon, 04 Jun 2012 17:35:01 +0200
+
+mydumper (0.5.1-2) unstable; urgency=low
+
+  * fixed watch file
+  * updated standards version
+  * patch 0005-zlib-file-type-change-fixes.patch added
+    fix FTBFS from zlib > 1.2.4 (Closes: #662582) (LP: #948122)
+
+ -- Mateusz Kijowski <mateusz.kijowski@gmail.com>  Fri, 23 Mar 2012 17:27:57 +0100
+
+mydumper (0.5.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #648711)
+  * This is my first Debian package, be gentle
+  * Patched CMakeLists.txt so that generated config.h file is put in the
+    sources dir, where it is expected during the build
+  * Patched documenation CMakeLists.txt so that it won't install 
+    documentation source files
+  * Patch added to fix missing description in the manpages
+  * Fixed typo in myloader
+
+ -- Mateusz Kijowski <mateusz.kijowski@gmail.com>  Thu, 15 Nov 2011 11:26:38 +0100
