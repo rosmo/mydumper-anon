@@ -1,0 +1,39 @@
+From: Mateusz Kijowski <mkijowski@trojmiasto.pl>
+Date: Tue, 15 Nov 2011 11:19:01 +0100
+Subject: manpage whatis description
+
+---
+ docs/CMakeLists.txt    | 4 ++++
+ docs/_build/conf.py.in | 4 ++--
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/docs/CMakeLists.txt b/docs/CMakeLists.txt
+index 8fdb6b4..c43d246 100644
+--- a/docs/CMakeLists.txt
++++ b/docs/CMakeLists.txt
+@@ -27,6 +27,10 @@ if(GENERATE_DOC)
+   # master document with modules index
+   set(REF_MASTER_DOC "modules")
+ 
++  # vars necessary for manpages generation
++  set(MYDUMPER_PROGRAM_DESC "multi-threaded MySQL dumping")
++  set(MYLOADER_PROGRAM_DESC "multi-threaded MySQL loader")
++
+   # substitute variables in configuration and scripts
+   foreach(file
+       conf.py
+diff --git a/docs/_build/conf.py.in b/docs/_build/conf.py.in
+index 9985c74..4844933 100644
+--- a/docs/_build/conf.py.in
++++ b/docs/_build/conf.py.in
+@@ -211,8 +211,8 @@ latex_documents = [
+ # One entry per manual page. List of tuples
+ # (source start file, name, description, authors, manual section).
+ man_pages = [
+-    ('mydumper_usage', 'mydumper', u'@PROGRAM_DESC@',
++    ('mydumper_usage', 'mydumper', u'@MYDUMPER_PROGRAM_DESC@',
+      [u'Andrew Hutchings'], 1),
+-    ('myloader_usage', 'myloader', u'@PROGRAM_DESC@',
++    ('myloader_usage', 'myloader', u'@MYLOADER_PROGRAM_DESC@',
+      [u'Andrew Hutchings'], 1)
+ ]

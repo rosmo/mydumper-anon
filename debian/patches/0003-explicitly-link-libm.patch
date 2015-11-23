@@ -1,0 +1,33 @@
+From: Mateusz Kijowski <mateusz.kijowski@gmail.com>
+Date: Mon, 20 Jan 2014 21:42:40 +0100
+Subject: explicitly link libm
+
+---
+ CMakeLists.txt | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bb4f64e..90be7a6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,6 +9,7 @@ find_package(MySQL)
+ find_package(ZLIB)
+ find_package(GLIB2)
+ find_package(PCRE)
++find_library(M_LIB m)
+ 
+ option(BUILD_DOCS "Build the documentation" ON)
+ 
+@@ -28,10 +29,10 @@ MARK_AS_ADVANCED(CMAKE)
+ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+ 
+ add_executable(mydumper mydumper.c binlog.c server_detect.c g_unix_signal.c)
+-target_link_libraries(mydumper ${MYSQL_LIBRARIES_mysqlclient_r} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES})
++target_link_libraries(mydumper ${MYSQL_LIBRARIES_mysqlclient_r} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES} ${M_LIB})
+ 
+ add_executable(myloader myloader.c)
+-target_link_libraries(myloader ${MYSQL_LIBRARIES_mysqlclient_r} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES})
++target_link_libraries(myloader ${MYSQL_LIBRARIES_mysqlclient_r} ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES} ${PCRE_PCRE_LIBRARY} ${ZLIB_LIBRARIES} ${M_LIB})
+ 
+ INSTALL(TARGETS mydumper myloader
+   RUNTIME DESTINATION bin

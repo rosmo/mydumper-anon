@@ -1,0 +1,2 @@
+shlibs:Depends=libc6 (>= 2.2.5), libglib2.0-0 (>= 2.31.8), libmysqlclient18 (>= 5.5.24+dfsg-1), libpcre3 (>= 8.10), libssl1.0.0 (>= 1.0.0), libyaml-0-2, zlib1g (>= 1:1.2.3.3)
+misc:Depends=
