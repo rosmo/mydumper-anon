@@ -26,6 +26,15 @@ One has to make sure, that pkg-config, mysql_config, pcre-config are all in $PAT
 
 Binlog dump is disabled by default to compile with it you need to add -DWITH_BINLOG=ON to cmake options
 
+=== MacOSX homebrew formula ===
+
+[Homebrew](http://brew.sh/) is a package manager for MacOSX.
+
+```
+brew install https://raw.githubusercontent.com/rosmo/mydumper-anon/master/homebrew/mydumper-anon.rb
+```
+
+
 == How does consistent snapshot work? ==
 
 This is all done following best MySQL practices and traditions:
