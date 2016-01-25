@@ -200,6 +200,8 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	// shortest that needs replacing is "{{a}}"
 	if (strlen(value) < 5) {
 		row[column_index] = strdup(value);
+		lengths[column_index] = strlen(value);
+		changed[column_index] = TRUE;
 		return;
 	}
 
