@@ -198,6 +198,13 @@ void replace_column_contents(const char *value, MYSQL_FIELD *fields, int num_fie
 	GChecksum *cksum = NULL;
 
 	// shortest that needs replacing is "{{a}}"
+	if ((fields[column_index].flags & NUM_FLAG) &&
+	    strcmp(value, "") == 0) {
+		row[column_index] = NULL;
+		lengths[column_index] = 0;
+		changed[column_index] = TRUE;
+		return;
+	}
 	if (strlen(value) < 5) {
 		row[column_index] = strdup(value);
 		lengths[column_index] = strlen(value);
@@ -365,8 +372,7 @@ void edit_table_columns(GNode *edit_cfg, MYSQL_FIELD *fields, int num_fields, MY
 				}
 				
 				value_node = g_node_first_child(field_node);
-				if (value_node != NULL && row[column_index] != NULL &&
-				    !(fields[column_index].flags & NUM_FLAG)) {
+				if (value_node != NULL && row[column_index] != NULL) {
 					re = pcre_compile((char *)value_node->data, 0, &error, &erroroffset, NULL);
 					if (!re) {
 						g_critical("Anonymizer: Regular expression %s fail: %s", (char *)value_node->data, error);
